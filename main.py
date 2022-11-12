@@ -14,39 +14,54 @@ fechaBaja = today.strftime("%Y-%m-%d")
 
 #######################FUNCIONES######################
 def Alta ():
-    if len(e1.get()) > 6 and len(e2.get()) > 15 and len(e3.get()) > 15 and len(e4.get()) > 20\
-         and len(e8.get()) > 9 and len(e9.get()) > 9:
-        messagebox.showinfo("Informacion importante","Se recomienda cumplir con el limite de los siguientes datos por favor.\n"
-                                             "- Sku: 6 digitos max\n"
-                                             "- Articulo: 15 digitos max\n"
-                                             "- Marca: 15 digitos max\n"
-                                             "- Modelo: 20 digitos max\n"
-                                             "- Stock: 9 digitos max \n"
-                                             "- Cantidad: 9 digitos max")
-    else:
+    #Este if, me ayuda a validar los controles que no esten vacios para que no me de error el sistema
+    if e1.get() and e2.get() and e3.get() and e4.get() and e5.get() and e6.get() and e7.get() and e8.get() and e9.get():
+        print("se lleno completamente")
 
-        if int(e9.get()) > int(e8.get()):
-            messagebox.showinfo("Nope","No se puede por que la cantidad no debe ser mayor al stock")
+        # Se cambio el AND por OR para que una vez que salga el mensaje de limites de digitos sea por que un entry no cumplio
+        # con lim, en ves de que sea necesario llenar todos los entrys
+        if len(e1.get()) > 6 or len(e2.get()) > 15 or len(e3.get()) > 15 or len(e4.get()) > 20 \
+                or len(e8.get()) > 9 or len(e9.get()) > 9:
+            messagebox.showinfo("Informacion importante",
+                                "Se recomienda cumplir con el limite de los siguientes datos por favor.\n"
+                                "- Sku: 6 digitos max\n"
+                                "- Articulo: 15 digitos max\n"
+                                "- Marca: 15 digitos max\n"
+                                "- Modelo: 20 digitos max\n"
+                                "- Stock: 9 digitos max \n"
+                                "- Cantidad: 9 digitos max")
         else:
-            # Se da de alta los datos, el read lee el fiechero para así dar uso de insertar datos con el append
-            dfArticulos = pd.read_csv("JollyRancher.csv",delimiter=",")  # Se creo un dataframe, basicamente se creo una tabla proveniente de excel a python
-            dfArticulos = dfArticulos.append(pd.Series(
-                [e1.get(), e2.get(), e3.get(), e4.get(), e5.get(), e6.get(), e7.get(), e9.get(), e8.get(), fechaAlta, 0,
-                 "1900-01-01"], index=dfArticulos.columns), ignore_index=True)  # esta linea, agrega datos de columnas
 
-            # Para borrar al momento de ingresar y dar alta los datos
-            e1.delete(0, END)
-            e2.delete(0, END)
-            e3.delete(0, END)
-            e4.delete(0, END)
-            e8.delete(0, END)
-            e9.delete(0, END)
+            if int(e9.get()) > int(e8.get()):
+                messagebox.showinfo("Nope", "No se puede por que la cantidad no debe ser mayor al stock")
+            else:
+                # Se da de alta los datos, el read lee el fiechero para así dar uso de insertar datos con el append
+                dfArticulos = pd.read_csv("JollyRancher.csv",
+                                          delimiter=",")  # Se creo un dataframe, basicamente se creo una tabla proveniente de excel a python
+                dfArticulos = dfArticulos.append(pd.Series(
+                    [e1.get(), e2.get(), e3.get(), e4.get(), e5.get(), e6.get(), e7.get(), e9.get(), e8.get(),
+                     fechaAlta, 0,
+                     "1900-01-01"], index=dfArticulos.columns),
+                    ignore_index=True)  # esta linea, agrega datos de columnas
 
-            dfArticulos.to_csv('JollyRancher.csv',
-                               index=False)  # index = false lo que hace, evita que se haga espacio blanco en las celdas de excel
-            print(dfArticulos.head())
+                # Para borrar al momento de ingresar y dar alta los datos
+                e1.delete(0, END)
+                e2.delete(0, END)
+                e3.delete(0, END)
+                e4.delete(0, END)
+                e5.set("") # me limpia la lista para que no muestre nada en los entrys y que no se queden los datos ahí flotando
+                e6.set("")
+                e7.set("")
+                e8.delete(0, END)
+                e9.delete(0, END)
 
-            messagebox.showinfo("Datos dados de alta", "Se ha subido los datos existosamente!")
+                dfArticulos.to_csv('JollyRancher.csv',
+                                   index=False)  # index = false lo que hace, evita que se haga espacio blanco en las celdas de excel
+                print(dfArticulos.head())
+
+                messagebox.showinfo("Datos dados de alta", "Se ha subido los datos existosamente!")
+    else:
+        messagebox.showinfo("Datos incompletos", "Falta campos por rellenar, por favor verifique bien los datos.")
 
 def Baja ():
     dfArticulos = pd.read_csv("JollyRancher.csv", delimiter=",")
@@ -89,6 +104,8 @@ def Cambio():
 
     if Checkbox.get() == 1:
         dfArticulos.loc[dfArticulos["Sku"] == int(e1.get()),"Fecha Baja"] = today
+    else:
+        dfArticulos.loc[dfArticulos["Sku"] == int(e1.get()), "Fecha Baja"] = "1900-01-01"
 
 
     messagebox.showinfo("Cambio realizado", "Se ha hecho el cambio.")
@@ -98,9 +115,9 @@ def Cambio():
     e2.delete(0, END)
     e3.delete(0, END)
     e4.delete(0, END)
-    e5.delete(0, END)
-    e6.delete(0, END)
-    e7.delete(0, END)
+    e5.set("")  # me limpia la lista para que no muestre nada en los entrys y que no se queden los datos ahí flotando
+    e6.set("")
+    e7.set("")
     e8.delete(0, END)
     e9.delete(0, END)
     eFechaBaja.delete("1.0",END)
@@ -109,105 +126,117 @@ def Cambio():
 def Consulta():
     dfArticulos = pd.read_csv("JollyRancher.csv", delimiter=",")
 
-    #En dfArticulos, para ser más especifico en la busqueda, se le inserta [] y dentro el nombre de lo que se quiere buscar.
-    if int(e1.get()) not in dfArticulos["Sku"].values: #Si no se encuentra dentro de mi DATAFRAME que viene siendo dfArticulos hara lo siguiente
+    if e1.get(): #Checar que se haya introducido un Sku
 
-        e2["state"] = NORMAL
-        e3["state"] = NORMAL
-        e4["state"] = NORMAL
-        e5["state"] = NORMAL
-        e6["state"] = NORMAL
-        e7["state"] = NORMAL
-        e8["state"] = NORMAL
-        e9["state"] = NORMAL
+        # En dfArticulos, para ser más especifico en la busqueda, se le inserta [] y dentro el nombre de lo que se quiere buscar.
+        if int(e1.get()) not in dfArticulos[
+            "Sku"].values:  # Si no se encuentra dentro de mi DATAFRAME que viene siendo dfArticulos hara lo siguiente
 
-        #Para borrar al momento de ingresar y dar alta los datos, el sku se queda por que se le va dar de alta
-        e2.delete(0, END)
-        e3.delete(0, END)
-        e4.delete(0, END)
-        # e5.delete(0, END)
-        # e6.delete(0, END)
-        # e7.delete(0, END)
-        e8.delete(0, END)
-        e9.delete(0, END)
+            e2["state"] = NORMAL
+            e3["state"] = NORMAL
+            e4["state"] = NORMAL
+            e5["state"] = NORMAL
+            e6["state"] = DISABLED
+            e7["state"] = DISABLED
+            e8["state"] = NORMAL
+            e9["state"] = NORMAL
 
-        b1["state"] = NORMAL
-        b2["state"] = DISABLED
-        b3["state"] = DISABLED
+            # Para borrar al momento de ingresar y dar alta los datos, el sku se queda por que se le va dar de alta
+            e2.delete(0, END)
+            e3.delete(0, END)
+            e4.delete(0, END)
+            # e5.delete(0, END)
+            # e6.delete(0, END)
+            # e7.delete(0, END)
+            e8.delete(0, END)
+            e9.delete(0, END)
 
+            b1["state"] = NORMAL
+            b2["state"] = DISABLED
+            b3["state"] = DISABLED
+
+        else:
+
+            print(dfArticulos.loc[dfArticulos["Sku"] == int(
+                e1.get())])  # Se busca en la base de datos con el dataframe por el SKU :D
+
+            # Habilitar los entrys de cada widget
+            e2["state"] = NORMAL
+            e3["state"] = NORMAL
+            e4["state"] = NORMAL
+            e5["state"] = NORMAL
+            e6["state"] = NORMAL
+            e7["state"] = NORMAL
+            e8["state"] = NORMAL
+            e9["state"] = NORMAL
+            e10["state"] = NORMAL
+            eFechaBaja["state"] = NORMAL
+            eFechaAlta["state"] = NORMAL
+
+            # Hace que aparezca los datos en los entrys al verificar que el sku existe, mas que nada, los rellena con los datos ya existentes.#
+
+            Busqueda = dfArticulos.loc[dfArticulos["Sku"] == (
+                int(e1.get()))]  # lo que hace es guiarse con el sku para así encontrar los demás datos
+
+            # Para borrar al momento de ingresar y dar alta los datos
+            e2.delete(0, END)
+            e3.delete(0, END)
+            e4.delete(0, END)
+            e8.delete(0, END)
+            e9.delete(0, END)
+            eFechaBaja.delete(1.0, END)
+            eFechaAlta.delete(1.0, END)
+
+            # El .loc esta buscando desde la posicion 0 el valor de la columna establecida, iloc es para buscar por posicion, es el que mejor jalo
+            e2.insert(0, Busqueda.iloc[0]["Articulo"])
+            e3.insert(0, Busqueda.iloc[0]["Marca"])
+            e4.insert(0, Busqueda.iloc[0]["Modelo"])
+            e5.set(Busqueda.iloc[0]["Departamento"])  # El set lo establece, pone el valor como dice su nombre
+            e6.set(Busqueda.iloc[0]["Clase"])
+            e7.set(Busqueda.iloc[0]["Familia"])
+            e8.insert(0, Busqueda.iloc[0]["Stock"])
+            e9.insert(0, Busqueda.iloc[0]["Cantidad"])
+            ################Para activar o desactivar el checbox##############
+            if Busqueda.iloc[0]['Descontinuado'] == 1:
+                e10.select()
+            elif Busqueda.iloc[0]['Descontinuado'] == 0:
+                e10.deselect()
+            ##################################################################
+            eFechaBaja.insert(END, Busqueda.iloc[0]["Fecha Baja"])
+            eFechaAlta.insert(END, Busqueda.iloc[0]["Fecha Alta"])
+
+            # Habilitar los botones BAJA Y CAMBIO, DESABILITAR ALTA porque ya existe
+            b1["state"] = DISABLED
+            b2["state"] = NORMAL
+            b3["state"] = NORMAL
     else:
+        messagebox.showinfo("Sku no introducido", "Por favor introduce un Sku para hacer la consulta.")
 
-        print(dfArticulos.loc[dfArticulos["Sku"]==int(e1.get())]) #Se busca en la base de datos con el dataframe por el SKU :D
 
-        #Habilitar los entrys de cada widget
-        e2["state"] = NORMAL
-        e3["state"] = NORMAL
-        e4["state"] = NORMAL
-        e5["state"] = NORMAL
-        e6["state"] = NORMAL
-        e7["state"] = NORMAL
-        e8["state"] = NORMAL
-        e9["state"] = NORMAL
-        e10["state"] = NORMAL
-        eFechaBaja["state"] = NORMAL
-        eFechaAlta["state"] = NORMAL
-
-        #Hace que aparezca los datos en los entrys al verificar que el sku existe, mas que nada, los rellena con los datos ya existentes.#
-
-        Busqueda = dfArticulos.loc[dfArticulos["Sku"]==(int(e1.get()))] #lo que hace es guiarse con el sku para así encontrar los demás datos
-
-        #Para borrar al momento de ingresar y dar alta los datos
-        e2.delete(0, END)
-        e3.delete(0, END)
-        e4.delete(0, END)
-        # e5.delete(0, END)
-        # e6.delete(0, END)
-        # e7.delete(0, END)
-        e8.delete(0, END)
-        e9.delete(0, END)
-        eFechaBaja.delete(1.0, END)
-        eFechaAlta.delete(1.0, END)
-
-        #El .loc esta buscando desde la posicion 0 el valor de la columna establecida, iloc es para buscar por posicion, es el que mejor jalo
-        e2.insert(0, Busqueda.iloc[0]["Articulo"])
-        e3.insert(0, Busqueda.iloc[0]["Marca"])
-        e4.insert(0, Busqueda.iloc[0]["Modelo"])
-        e5.set(Busqueda.iloc[0]["Departamento"]) #El set lo establece, pone el valor como dice su nombre
-        e6.set(Busqueda.iloc[0]["Clase"])
-        e7.set(Busqueda.iloc[0]["Familia"])
-        e8.insert(0, Busqueda.iloc[0]["Stock"])
-        e9.insert(0, Busqueda.iloc[0]["Cantidad"])
-        ################Para activar o desactivar el checbox##############
-        if Busqueda.iloc[0]['Descontinuado'] == 1:
-            e10.select()
-        elif Busqueda.iloc[0]['Descontinuado'] == 0:
-            e10.deselect()
-        ##################################################################
-        eFechaBaja.insert(END, Busqueda.iloc[0]["Fecha Baja"])
-        eFechaAlta.insert(END, Busqueda.iloc[0]["Fecha Alta"])
-
-        #Habilitar los botones BAJA Y CAMBIO, DESABILITAR ALTA porque ya existe
-        b1["state"] = DISABLED
-        b2["state"] = NORMAL
-        b3["state"] = NORMAL
 
 ##################Funciones para activar los botonoes de dropbox y hacer la busqueda y enlace######################
+#Nombre Depa busca Numero Depa -> Numero Depa busca Nombre Clase -> Nombre Clase busca Numero Clase -> Numero Clase busca Nombre Familia
 def activarClase(self):
     e6["state"] = NORMAL
     TablaClase = pd.read_csv("Clase.csv", delimiter=",") #se lee el archivo de Clase.csv
-    TablaClase["Num Clase"]
+    TablaDepa = pd.read_csv("Departamentos.csv", delimiter=",")
+
     #Se neceista este codigo para hacer que lo que dropea de Depa, suelte las opciones de Depa.
-    BusqNumDep = TablaClase[TablaClase["Num Depa"] == (int(e5.get()))] #Se esta flitrando para buscar el numero de depa en Clase.csv
-    e6.config(values=list(BusqNumDep["Num Clase"])) #me va a traer el numero de las clases asociados con el num de departamentos.
+    BusqNumDep = TablaDepa[TablaDepa["Nombre Depa"] == (e5.get())] #Se esta flitrando para buscar el numero de depa en Departamento.csv
+    BusqClase = TablaClase[TablaClase["Num Depa"] == BusqNumDep.iloc[0]["Num Depa"]] #Se esta flitrando para buscar el numero de depa en Departamento.csv
+    e6.config(values=list(BusqClase["Nombre Clase"])) #me va a traer el nombre de las clases asociados con el nombre de departamento
+
 
 #Mismo procedimiento que la funcion de activarClase
 def activarFamily(self):
     e7["state"] = NORMAL
     TablaFamily = pd.read_csv("Familia.csv", delimiter=",")
-    TablaFamily["Num Familia"]
+    TablaClase = pd.read_csv("Clase.csv", delimiter=",")
 
-    BusqNumFam = TablaFamily[TablaFamily["Num Clase"] == (int(e6.get()))]
-    e7.config(values=list(BusqNumFam["Num Familia"]))
+    BusqClase = TablaClase[TablaClase["Nombre Clase"] == (e6.get())] #Con el Nombre Clase
+    BusqFam = TablaFamily[TablaFamily["Num Clase"] == BusqClase.iloc[0]["Num Clase"]] #Se busca el Num Clase
+
+    e7.config(values=list(BusqFam["Nombre Familia"]))#se busca Nombre Familia y lo muestra.
 
 ########### WIDGETS ################
 
@@ -243,8 +272,8 @@ e4.grid(column=1,row=4,columnspan=2, sticky=W+E, padx=20)
 e4["state"] = DISABLED
 ############Para hacer que sea un dropbox################
 TablaDepa = pd.read_csv("Departamentos.csv",delimiter=",")#agarrar el archivo de departamentos y hacerlo en tabla en python
-TablaDepa["Num Depa"] #Esta buscando los numeros de los depas
-options = list(TablaDepa["Num Depa"]) #se convierte en una lista la "TablaDepa"
+TablaDepa["Nombre Depa"] #Esta buscando los nombres de los depas
+options = list(TablaDepa["Nombre Depa"]) #se convierte en una lista la "TablaDepa"
 
 click = StringVar()
 click.set(options[0])
